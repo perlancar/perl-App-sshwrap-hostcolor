@@ -105,7 +105,7 @@ then you can use it like this:
 
 After you ssh to the remote host, change the background color of your terminal
 (e.g. to dark blue). Upon exit, the script will retrieve the terminal's current
-background color and record this line to F<~/sshwrap-hostcolor.history>:
+background color and record this line to F<~/.sshwrap-hostcolor.history>:
 
  ujang@host1.example     00002b
 
