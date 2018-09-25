@@ -1,0 +1,60 @@
+#!perl
+
+# DATE
+# VERSION
+
+# NO_PERINCI_CMDLINE_SCRIPT
+# FRAGMENT id=shcompgen-hint completer=1 for=ssh
+
+use 5.010001;
+use strict;
+use warnings;
+use Log::ger;
+
+use AppLib::sshwrap;
+use Getopt::Long::Complete; # just so it can be detected as Getopt::Long script by Getopt::Long::Util
+use ShellCompleter::Util qw(run_shell_completer_for_getopt_long_app);
+
+my $optspec = \%AppLib::sshwrap::optspec;
+
+$optspec->{'{arg}'} = {
+    completion => sub {
+        require App::sshwrap::hostcolor;
+        require Complete::Util;
+
+        my %args = @_;
+        if ($args{argpos} == 0) {
+            # lookup user@host from history file
+            my $history = App::sshwrap::hostcolor::read_history_file();
+            my $ans = Complete::Util::complete_array_elem(
+                array => [keys %$history], word => $args{word});
+            if ($ans && ref($ans) eq 'ARRAY' && @$ans == 1 &&
+                    $history->{$ans->[0]}) {
+                require XTerm::Util;
+                log_trace "Setting background color for $ans->[0] ($history->{$ans->[0]}) ...";
+                XTerm::Util::set_term_bgcolor($history->{$ans->[0]});
+            }
+            $ans;
+        } else {
+            return undef;
+        }
+    }
+};
+
+run_shell_completer_for_getopt_long_app(%$optspec);
+
+# ABSTRACT: Shell completer for ssh (sshwrap-hostcolor)
+# PODNAME:
+
+=head1 SYNOPSIS
+
+To install, install the CPAN distribution this command comes in with, and then
+in your bash (and/or bash startup file):
+
+ complete -C _sshwrap-hostcolor ssh
+
+or, you can use L<shcompgen> to do that for you automatically.
+
+Now B<ssh> has bash completion:
+
+ % ssh -p <tab>
