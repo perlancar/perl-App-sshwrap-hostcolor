@@ -109,8 +109,8 @@ background color and record this line to F<~/.sshwrap-hostcolor.history>:
 
  ujang@host1.example     00002b
 
-Next time you ssh to the same host (the same I<user@host> combination, to be
-exact), the script will set the terminal's background color to dark blue.
+Next time you ssh to the same C<user@host> combination, the script will set the
+terminal's background color to dark blue.
 
 As a bonus, you can also activate the completion script L<_sshwrap-hostcolor>:
 
