@@ -131,6 +131,10 @@ As a bonus, you can also activate the completion script L<_sshwrap-hostcolor>:
 this will let you complete C<user@host> and immediately change the background
 color to the remembered one.
 
+And as another bonus, if you set C<SSHWRAP_HOSTCOLOR_AUTO> to C<random-dark> (or
+C<random-light>), the script will automatically assign a random color for each
+unrecognized user+host.
+
 
 =head1 DESCRIPTION
 
