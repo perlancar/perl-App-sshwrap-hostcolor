@@ -69,3 +69,7 @@ See the included script L<sshwrap-hostcolor>.
 =head1 SEE ALSO
 
 B<ssh>
+
+Some video demonstrations: L<one|https://www.youtube.com/watch?v=Upz1ZtiJk1Y>,
+L<two|https://www.youtube.com/watch?v=IyJKea6Sv8U>,
+L<three|https://www.youtube.com/watch?v=Upz1ZtiJk1Y>.
