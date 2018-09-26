@@ -28,9 +28,11 @@ sub parse_cmdline {
 }
 
 my $origcolor;
+my $env;
 sub init {
     parse_cmdline();
     $origcolor = get_term_bgcolor();
+    $env = $ENV{SSHWRAP_HOSTCOLOR_AUTO} // '';
 }
 
 my $history;
@@ -49,6 +51,16 @@ sub set_hostcolor {
     read_history();
     if ($history->{$userhost}) {
         log_info "Setting host color ($userhost -> $history->{$userhost})";
+        set_term_bgcolor($history->{$userhost});
+    } elsif ($env eq 'random-dark') {
+        require Color::RGB::Util;
+        $history->{$userhost} =
+            Color::RGB::Util::rand_rgb_color('000000', '3f3f3f');
+        set_term_bgcolor($history->{$userhost});
+    } elsif ($env eq 'random-light') {
+        require Color::RGB::Util;
+        $history->{$userhost} =
+            Color::RGB::Util::rand_rgb_color('c0c0c0', 'ffffff');
         set_term_bgcolor($history->{$userhost});
     }
 }
@@ -121,6 +133,16 @@ color to the remembered one.
 
 
 =head1 DESCRIPTION
+
+
+=head1 ENVIRONMENT
+
+=head2 SSHWRAP_HOSTCOLOR_AUTO
+
+String. Can be set to C<random-dark> to automatically set the color of a new
+user+host with a random color between "000000" and "3f3f3f". Can be set
+toC<random-light> to automatically set the color of a new user+host with a
+random color between "c0c0c0" and "ffffff".
 
 
 =head1 FAQ
