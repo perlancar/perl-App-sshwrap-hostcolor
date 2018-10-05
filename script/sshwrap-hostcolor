@@ -68,15 +68,14 @@ sub set_hostcolor {
 sub get_hostcolor {
     return unless defined $userhost;
 
-    require XTerm::Util;
-    my $color = XTerm::Util::get_term_bgcolor();
+    my $color = get_term_bgcolor();
     if ($color) {
         log_info "Recording host color $userhost -> $color";
         $history->{$userhost} = $color;
         write_history();
     }
     if ($origcolor) {
-        XTerm::Util::set_term_bgcolor($origcolor);
+        set_term_bgcolor($origcolor);
     }
 }
 
