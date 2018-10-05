@@ -11,6 +11,7 @@ use Log::ger;
 use App::sshwrap::hostcolor;
 use AppLib::sshwrap;
 use Getopt::Long qw(:config bundling no_ignore_case);
+use Time::HiRes qw(sleep);
 use XTerm::Util qw(get_term_bgcolor set_term_bgcolor);
 
 my $userhost;
@@ -46,22 +47,31 @@ sub write_history {
     App::sshwrap::hostcolor::write_history_file($history);
 }
 
+sub _set_term_bgcolor_anim {
+    my ($to) = @_;
+    for (1..2) {
+        set_term_bgcolor($to); sleep 0.1;
+        set_term_bgcolor($origcolor); sleep 0.2;
+    }
+    set_term_bgcolor($to);
+}
+
 sub set_hostcolor {
     return unless defined $userhost;
     read_history();
     if ($history->{$userhost}) {
         log_info "Setting host color ($userhost -> $history->{$userhost})";
-        set_term_bgcolor($history->{$userhost});
+        _set_term_bgcolor_anim($history->{$userhost});
     } elsif ($env eq 'random-dark') {
         require Color::RGB::Util;
         $history->{$userhost} =
             Color::RGB::Util::rand_rgb_color('000000', '3f3f3f');
-        set_term_bgcolor($history->{$userhost});
+        _set_term_bgcolor_anim($history->{$userhost});
     } elsif ($env eq 'random-light') {
         require Color::RGB::Util;
         $history->{$userhost} =
             Color::RGB::Util::rand_rgb_color('c0c0c0', 'ffffff');
-        set_term_bgcolor($history->{$userhost});
+        _set_term_bgcolor_anim($history->{$userhost});
     }
 }
 
