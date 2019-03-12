@@ -1,3 +1,9 @@
+0.008   2019-03-12 (PERLANCAR)
+
+	- [Bugfix] [regression] Re-add removed function read_history_file()
+	  because it is used by completer script.
+
+
 0.007   2019-03-12 (PERLANCAR)
 
 	- [Bugfix] Fix history recording which caused missing entries.
