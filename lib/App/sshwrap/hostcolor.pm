@@ -8,52 +8,84 @@ use strict;
 use warnings;
 use Log::ger;
 
+use Fcntl ':DEFAULT';
+use File::Flock::Retry;
+
+use Exporter qw(import);
+our @EXPORT_OK = qw(get_history_entry add_history_entry);
+
 my $histname = ".sshwrap-hostcolor.history";
 
 sub _history_path {
     require PERLANCAR::File::HomeDir;
 
-    my $homedir = PERLANCAR::File::HomeDir::get_my_home_dir() or do {
-        log_info "Couldn't get current user's homedir, bailing out";
-        return;
-    };
+    my $homedir = PERLANCAR::File::HomeDir::get_my_home_dir()
+        or die "Couldn't get current user's homedir";
     return "$homedir/$histname";
 }
 
-sub read_history_file {
-    my $histpath = _history_path or return {};
+sub get_history_entry {
+    my $key = shift;
 
-    log_trace "Reading history file $histpath ...";
-    open my $fh, "<", $histpath or do {
-        log_info "Couldn't read $histpath ($!), bailing out";
-        return {};
-    };
-    my $hist = {};
+    my $histpath = _history_path();
+
+    log_trace "Opening history file $histpath ...";
+    my $lock = File::Flock::Retry->lock($histpath);
+    my $fh = $lock->handle;
+    seek $fh, 0, 0;
+
     while (<$fh>) {
         /\S/ or next;
         /^\s*#/ and next;
         chomp;
-        my @f = split /\s+/, $_;
-        $hist->{$f[0]} = $f[1];
+        my @f = split /\s+/, $_, 2;
+        if ($f[0] eq $key) {
+            log_trace "Found entry for '%s' in history file: %s",
+                $key, $f[1];
+            return $f[1];
+        }
     }
-    $hist;
+    log_trace "No entry found for '%s' in history file", $key;
+    undef;
 }
 
-sub write_history_file {
-    my $hist = shift;
+sub add_history_entry {
+    my ($key, $val) = @_;
 
-    my $histpath = _history_path or return;
+    my $histpath = _history_path();
 
-    log_trace "Writing history file $histpath ...";
-    open my $fh, ">", $histpath or do {
-        log_info "Couldn't write $histpath ($!), bailing out";
-        return;
-    };
+    log_trace "Opening history file $histpath ...";
+    my $lock = File::Flock::Retry->lock($histpath);
+    my $fh = $lock->handle;
+    seek $fh, 0, 0;
 
-    for (sort keys %$hist) {
-        print $fh "$_\t$hist->{$_}\n";
+    my @lines;
+    my $found;
+    while (<$fh>) {
+        /\S/ or next;
+        /^\s*#/ and next;
+        chomp;
+        my @f = split /\s+/, $_, 2;
+        if ($f[0] eq $key) {
+            if ($found) {
+                log_trace "Duplicate entry '' in history file, removing";
+                next;
+            }
+            log_trace "Replacing entry for '%s' in history file: %s -> %s",
+                $key, $f[1], $val;
+            $f[1] = $val;
+            $found++;
+        }
+        push @lines, "$f[0]\t$f[1]\n";
     }
-    close $fh;
+    unless ($found) {
+        log_trace "Adding entry for '%s' in history file: %s", $key, $val;
+        push @lines, "$key\t$val\n";
+    }
+
+    seek $fh, 0, 0;
+    print $fh @lines;
+    truncate $fh, tell($fh);
 }
 
 1;
