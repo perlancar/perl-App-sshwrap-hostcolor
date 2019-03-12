@@ -12,7 +12,7 @@ use Fcntl ':DEFAULT';
 use File::Flock::Retry;
 
 use Exporter qw(import);
-our @EXPORT_OK = qw(get_history_entry add_history_entry);
+our @EXPORT_OK = qw(get_history_entry add_history_entry read_history_file);
 
 my $histname = ".sshwrap-hostcolor.history";
 
@@ -22,6 +22,27 @@ sub _history_path {
     my $homedir = PERLANCAR::File::HomeDir::get_my_home_dir()
         or die "Couldn't get current user's homedir";
     return "$homedir/$histname";
+}
+
+sub read_history_file {
+    my $key = shift;
+
+    my $histpath = _history_path();
+
+    open my $fh, "<", $histpath or do {
+        log_trace "Cannot open history file $histpath: $!";
+        return {};
+    };
+
+    my $history = {};
+    while (<$fh>) {
+        /\S/ or next;
+        /^\s*#/ and next;
+        chomp;
+        my @f = split /\s+/, $_, 2;
+        $history->{$f[0]} = $f[1];
+    }
+    $history;
 }
 
 sub get_history_entry {
