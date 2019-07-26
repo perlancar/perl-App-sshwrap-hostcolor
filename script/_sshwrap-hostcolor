@@ -32,9 +32,15 @@ $optspec->{'{arg}'} = {
                 if (!@$ans) {
                     return undef;
                 } elsif (@$ans == 1 && $history->{$ans->[0]}) {
-                    require XTerm::Util;
-                    log_trace "Setting background color for $ans->[0] ($history->{$ans->[0]}) ...";
-                    XTerm::Util::set_term_bgcolor($history->{$ans->[0]}, 1);
+                    # currently commented because it changes background color
+                    # permanently, even after sshwrap executes and exits. this
+                    # should be changed to: launching a background process that
+                    # sets terminal color for a couple of seconds just for demo,
+                    # then change back to original color.
+
+                    #require XTerm::Util;
+                    #log_trace "Setting background color for $ans->[0] ($history->{$ans->[0]}) ...";
+                    #XTerm::Util::set_term_bgcolor($history->{$ans->[0]}, 1);
                 }
             }
             $ans;
