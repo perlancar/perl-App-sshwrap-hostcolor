@@ -1,3 +1,10 @@
+0.009   2019-07-26  Released-By: PERLANCAR; Urgency: medium
+
+	- [ux] Disable feature that change terminal background color during
+	  completion because it currently changes background color
+	  permanently; we want temporary change just for preview.
+
+
 0.008   2019-03-12  Released-By: PERLANCAR
 
 	- [Bugfix] [regression] Re-add removed function read_history_file()
